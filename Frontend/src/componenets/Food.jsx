@@ -87,6 +87,7 @@ export default function Food(props)
         <div className="food">
 
             <h3>{food.name} ({food.calories} Kcal for {eatenQuantity}G)</h3>
+            <img className="food-image" src={food.imageUrl} alt="Food"/>
 
             <div className="nutrient">
                 <p className="n-title">Protein</p>

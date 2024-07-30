@@ -18,11 +18,17 @@ export default function Header()
     return (
         <div>
 
-                <ul>
+                {/* <ul>
                     <Link to="/track"><li>Track</li></Link>
                     <Link to="/diet"><li>Diet</li></Link>
                     <li onClick={logout}>Logout</li>
-                </ul>
+                </ul> */}
+
+                <ul className="button-list">
+  <li><Link to="/track"><button className="btn">Track</button></Link></li>
+  <li><Link to="/diet"><button className="btn">Diet</button></Link></li>
+  <li className="logout"><button className="btn" onClick={logout}>Logout</button></li>
+</ul>
 
 
         </div>

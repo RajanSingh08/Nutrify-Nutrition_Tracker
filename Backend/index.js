@@ -22,7 +22,7 @@ app.use(cors());
 
 //mongoose connection
 mongoose
-  .connect("mongodb://127.0.0.1:27017/nutrify")
+  .connect("mongodb+srv://rajansingh2003rs:JtQ5NbvvfpWgAda3@cluster0.utt9pib.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
   .then(() => {
     console.log("Server is connected with database");
   })
@@ -30,54 +30,63 @@ mongoose
     console.log(err);
   });
 
-//registering a user
-app.post("/registration", async (req, res) => {
-  const userData = req.body;
-
-  try {
-    // Check if email is already registered
-    const existingUser = await userModel.findOne({ email: userData.email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered" });
+  app.post("/registration", async (req, res) => {
+    const { name, email, password, age, mobile } = req.body;
+  
+    // Validate request data
+    if (!name || !email || !password || !age || !mobile) {
+      return res.status(400).json({ message: "All fields are required" });
     }
-
-    // Generate salt
-    bcrypt.genSalt(10, (err, salt) => {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ message: "Error generating salt" });
+  
+    try {
+      // Check if email is already registered
+      const existingUser = await userModel.findOne({ email });
+      if (existingUser) {
+        return res.status(400).json({ message: "Email is already registered" });
       }
-
-      // Hash password with generated salt
-      bcrypt.hash(userData.password, salt, async (err, hpass) => {
+  
+      // Generate salt
+      bcrypt.genSalt(10, (err, salt) => {
         if (err) {
           console.log(err);
-          return res.status(500).json({ message: "Error hashing password" });
+          return res.status(500).json({ message: "Error generating salt" });
         }
-
-        userData.password = hpass;
-
-        try {
-          // Create a new user document
-          await userModel.create(userData);
-          return res.status(201).json({ message: "User Created" });
-        } catch (error) {
-          if (error.name === "ValidationError") {
-            // const errors = Object.values(error.errors).map(err => err.message);
-            // console.log(error.message);
-            return res.status(400).json(error);
-          } else {
-            console.log(error);
-            return res.status(500).json({ message: "Error creating user" });
+  
+        // Hash password with generated salt
+        bcrypt.hash(password, salt, async (err, hashedPassword) => {
+          if (err) {
+            console.log(err);
+            return res.status(500).json({ message: "Error hashing password" });
           }
-        }
+  
+          try {
+            // Create a new user document
+            const newUser = new userModel({
+              name,
+              email,
+              password: hashedPassword,
+              age,
+              mobile
+            });
+            await newUser.save();
+  
+            return res.status(201).json({ message: "User Created" });
+          } catch (error) {
+            if (error.name === "ValidationError") {
+              return res.status(400).json({ message: "Validation Error", details: error });
+            } else {
+              console.log(error);
+              return res.status(500).json({ message: "Error creating user" });
+            }
+          }
+        });
       });
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-});
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  });
+  
 
 //login with password
 app.post("/login", async (req, res) => {
@@ -277,6 +286,9 @@ app.get("/track/:userid/:date", async (req, res) => {
     res.status(500).send({ message: "Some Problem in getting the food" });
   }
 });
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on PORT ${PORT}`);
