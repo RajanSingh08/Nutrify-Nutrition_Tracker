@@ -66,7 +66,7 @@ export default function Login (){
                 <input type="text" className="inp" name="email"
                 placeholder="Enter Email" onChange={handleChange} />
 
-                <input type="text" className="inp" name="password"
+                <input type="password" className="inp" name="password"
                 placeholder="Enter password" onChange={handleChange} />
                 
                 <button className="btn">Login</button>
